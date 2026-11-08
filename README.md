@@ -55,6 +55,7 @@ task, building any missing upstream outputs first.
 ├── .latexmkrc                 # puts latex/ and bib/ on LaTeX's search paths
 ├── .claude/settings.json      # stops Claude Code's file tools reading data files
 ├── .github/workflows/         # CI: Makefile checks, R tests and lint, LaTeX, style
+├── docs/                      # task graph image shown in this README (made by make)
 ├── latex/                     # shared .sty files and macros (placeholders)
 ├── bib/                       # references.bib and the AEA bibliography style
 ├── lib/R/                     # shared R helpers (helpers.R) and tests/
@@ -70,6 +71,17 @@ task, building any missing upstream outputs first.
 
 The same `lib/R` pattern applies to other languages if a project needs it: `lib/python/`
 with `pytest`, or `lib/julia/` with `Test`.
+
+## Task graph
+
+`make task_graph` draws how tasks feed each other, read from the symbolic-link rules in
+their Makefiles, and saves a copy at `docs/task_graph.png` for this README.
+For the template's two example tasks, `example_sum` links the output of `example_numbers`:
+
+![Task graph: example_numbers feeds example_sum](docs/task_graph.png)
+
+In a real project the graph grows with every task, so it shows at a glance what a change
+upstream will affect. Drawing it needs graphviz (`brew install graphviz`).
 
 ## Notes
 

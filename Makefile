@@ -21,8 +21,11 @@ tasks: $(TASKS)
 $(TASKS):
 	$(MAKE) -C tasks/$@/code
 
+# The README shows a committed copy of the task graph, refreshed on every build
 task_graph:
 	$(MAKE) -C tasks/task_graph/code
+	mkdir -p docs
+	cp tasks/task_graph/output/task_flow.png docs/task_graph.png
 
 paper slides logbook: tasks
 	$(MAKE) -C $@
