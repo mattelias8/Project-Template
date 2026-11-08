@@ -1,0 +1,50 @@
+\citet{GentzkowShapiro:2014} give language-agnostic rules for research code.
+This entry lists how the template implements them in R, Python and Julia.
+
+\begin{description}
+	\item[Automation.]
+	One command rebuilds everything: the top-level \texttt{make} runs every task, then the paper, slides and logbook.
+	There are no manual export, copy-paste or point-and-click steps.
+	Raw formats are converted in code (\texttt{readxl}, \texttt{pandas.read\_excel}, \texttt{XLSX.jl}).
+	Tables and in-text numbers are written by code straight to \texttt{.tex} files and never copied from a console.
+
+	\item[Version control.]
+	Code and documents are tracked with git and GitHub.
+	Before committing, run \texttt{make clean} and \texttt{make} in every changed task and everything downstream.
+	Unlike Gentzkow and Shapiro's setup, data are not committed: raw data are referenced read-only, and outputs are rebuilt.
+
+	\item[Directories.]
+	Each task separates \texttt{input/}, \texttt{code/} and \texttt{output/}.
+	Inputs are symbolic links and paths are relative, so the project is portable.
+	\texttt{make clean} clears outputs so that a rebuild proves they come from the current code.
+
+	\item[Keys.]
+	Every saved table has a unique, non-missing key, checked by \texttt{assert\_key()} inside \texttt{save\_table()}.
+	Data stay normalised as long as possible, built in three steps: normalised tables that preserve the source; the same tables with derived variables added; and a final merge into the analysis array with no data manipulation.
+	Each variable lives in the table for the level it describes.
+
+	\item[Abstraction.]
+	Write a function the second time an operation recurs, not before.
+	Functions used across tasks go in \texttt{lib/} with unit tests.
+
+	\item[Documentation.]
+	Code should explain itself.
+	Comments explain why and cite sources.
+	Constants are computed from their named components in code rather than restated in comments.
+	Guards are code (\texttt{stopifnot}, \texttt{assert}, \texttt{@assert}), not ``don't do this'' comments.
+
+	\item[Management.]
+	Tasks are managed in GitHub Issues: one issue per task, one branch per issue, and a pull request that closes the issue.
+
+	\item[Code style.]
+	Lines are at most 100 characters (checked by \texttt{lintr}, \texttt{ruff} and JuliaFormatter).
+	Functions are short ($\lesssim 80$ lines), take explicit inputs and return explicit outputs, and are ordered for top-to-bottom reading.
+	Names are descriptive.
+	Logical tests say what they mean.
+	Error checks target costly failures and silent wrong answers, and repeated validation is centralised in one function.
+	Unit tests replace manual checks at the console.
+	Slow code is profiled.
+	Slow tasks (estimation, simulation) are separate from fast ones (tables, figures) and store everything they compute.
+\end{description}
+
+Dropped as Stata-specific or obsolete: Stata examples, Stat/Transfer, \texttt{outreg}, Windows \texttt{.bat} run scripts (replaced by Make), and the tool recommendations (Subversion, JIRA, Asana, Evernote), which git, GitHub Issues and this logbook replace.

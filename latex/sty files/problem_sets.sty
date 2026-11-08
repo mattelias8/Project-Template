@@ -1,0 +1,509 @@
+% =============================================================================
+%  ea2ps.sty  —  Self-contained style for EA2 problem sets
+%  Consolidates: oakps2minimal, oakenv, oakcolors, oakmacros
+% =============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{problem_sets}[2026/03/26 EA2 Problem Set Style]
+
+% ─── Packages ────────────────────────────────────────────────────────────────
+
+\RequirePackage{xparse}
+\RequirePackage{etoolbox}
+\RequirePackage[margin=1in]{geometry}
+\RequirePackage{setspace}
+\RequirePackage{changepage}
+\RequirePackage[explicit,noindentafter]{titlesec}
+\RequirePackage{fancyhdr}
+\RequirePackage{extramarks}
+\RequirePackage{lmodern}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{parskip}
+\RequirePackage{amsmath,amssymb,amsthm}
+\RequirePackage{mathtools}
+\RequirePackage{xcolor}
+\RequirePackage{framed}
+\RequirePackage{footnote}
+\RequirePackage{centernot}
+\RequirePackage{bbm}
+  \DeclareMathAlphabet\mathbbm{U}{fplmbb}{m}{n}
+
+% ─── Options ─────────────────────────────────────────────────────────────────
+
+\newbool{shaded}       \setbool{shaded}{true}
+\newbool{showbody}     \setbool{showbody}{true}
+\newbool{showsquare}   \setbool{showsquare}{true}
+\newbool{showscratchwork} \setbool{showscratchwork}{true}
+
+\DeclareOption{noshaded}      {\setbool{shaded}{false}}
+\DeclareOption{hidebody}      {\setbool{showbody}{false}}
+\DeclareOption{hidesquare}    {\setbool{showsquare}{false}}
+\DeclareOption{hidescratchwork}{\setbool{showscratchwork}{false}}
+\DeclareOption{hidesolutions} {\AtEndOfPackage{\setbool{showsolutions}{false}}}
+\DeclareOption{hidereflections}{\AtEndOfPackage{\setbool{showreflections}{false}}}
+\ProcessOptions\relax
+
+% ─── Spacing & Fonts ─────────────────────────────────────────────────────────
+
+\onehalfspacing
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+% ─── Formatting helpers ───────────────────────────────────────────────────────
+
+\newcommand{\partformatting}{\bfseries}
+\newcommand{\sectionformatting}{\bfseries}
+\newcommand{\subsectionformatting}{\bfseries\slshape}
+\newcommand{\titleformatting}{}
+\newcommand{\Problem}{Problem}
+
+% ─── Section / Part headers ──────────────────────────────────────────────────
+
+\renewcommand{\partname}{Part}
+
+\titleformat{\part}[display]
+    {\vfill\partformatting\Large\filcenter}
+    {\partname\ \thepart}
+    {1em}
+    {\Huge #1 \vfill \vfill}
+    [{\addcontentsline{problems}{part}{\partformatting \partname\ \thepart \ #1}}]
+\titleclass{\part}{page}
+
+% clear page before section 2+
+\newcommand{\sectionbreak}{\ifnum\value{section}>1\clearpage\fi}
+
+\titleformat{\section}
+    {\sectionformatting\large}
+    {\Problem\ \thesection}
+    {1em}
+    {#1}
+    [{%
+        \addcontentsline{problems}{section}{\sectionformatting \Problem\ \thesection \ #1}%
+        \nobreak\extramarks{}{\Problem\ \thesection\ continued on next page\ldots}\nobreak{}%
+        \nobreak\extramarks{\Problem\ \thesection\ (continued)}{\Problem\ \thesection\ continued on next page\ldots}\nobreak{}%
+    }]
+\titlespacing{\section}{0em}{0em}{0.5em}
+
+\titleformat{name=\section,numberless}
+    {\sectionformatting\large}
+    {}
+    {1em}
+    {#1}
+    [{%
+        \addcontentsline{problems}{section}{\sectionformatting #1}%
+        \nobreak\extramarks{}{}\nobreak{}%
+        \nobreak\extramarks{}{}\nobreak{}%
+    }]
+\titlespacing{name=\section,numberless}{-1.3em}{0em}{0.5em}
+
+\renewcommand{\thesubsection}{\alph{subsection}}
+\titleformat{\subsection}[runin]
+    {\subsectionformatting}{Part (\thesection.\thesubsection)}{0.5em}{#1}
+\titlespacing{\subsection}{0em}{0.5em}{1em}
+
+\renewcommand{\thesubsubsection}{\roman{subsubsection}}
+\titleformat{\subsubsection}[runin]
+    {\subsectionformatting}{Subpart (\thesection.\thesubsection.\thesubsubsection)}{0.5em}{#1}
+\titlespacing{\subsubsection}{0em}{0.5em}{1em}
+
+% ─── Class / Due commands ────────────────────────────────────────────────────
+
+\newcommand{\class}[1]{\renewcommand\@class{#1}}
+\newcommand{\@class}{}
+\newcommand{\due}{}
+
+% ─── Title ───────────────────────────────────────────────────────────────────
+
+\renewcommand{\maketitle}{%
+    \begingroup
+    \renewcommand{\and}{, }%
+    \renewcommand{\thefootnote}{\@fnsymbol\c@footnote}%
+    \let\footnote\thanks
+    \thispagestyle{empty}%
+    \vspace*{-5em}%
+    \noindent\rule{\textwidth}{1pt}\\[7pt]%
+    \makebox[\textwidth][s]{%
+        \makebox[0pt][l]{\@author}%
+        \hfill
+        {\titleformatting \textbf{\@class, \@title}}%
+        \hfill
+        \makebox[0pt][r]{\due\@date}%
+    }\par\nointerlineskip\vspace{4pt}%
+    \noindent\rule{\textwidth}{1pt}\par%
+    \@thanks
+    \endgroup
+    \setcounter{footnote}{0}%
+}
+
+\renewcommand{\and}{, }
+
+% ─── Headers & Footers ───────────────────────────────────────────────────────
+
+\pagestyle{fancy}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead{}\fancyfoot{}
+\fancyhead[L]{\@author}
+\fancyhead[R]{\firstxmark}
+\fancyfoot[L]{\lastxmark}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{{\let\thanks\@gobble\@class, \@title}}  % drop any \thanks mark from the footer
+
+% ─── Table of Contents helpers ───────────────────────────────────────────────
+
+\NewDocumentCommand{\listofproblemstitleformatting}{m}{\sectionformatting #1}
+\NewDocumentCommand{\listofproblems}{O{} O{0.5in} O{0.5in} O{0.8}}{
+    \begin{spacing}{#4}
+        \begin{adjustwidth}{#2}{#3}
+            \ifstrempty{#1}{}{\vspace*{1em}\centerline{\listofproblemstitleformatting{#1}}}
+            \@starttoc{problems}
+        \end{adjustwidth}
+    \end{spacing}
+}
+
+% ─── leftbar environment ─────────────────────────────────────────────────────
+
+\RenewDocumentEnvironment{leftbar}{m O{white} O{\hsize}}{%
+    \def\FrameCommand{%
+        {\color{#1}\vrule width \ifbool{shaded}{1pt}{3pt}}%
+        \hspace{0pt}%
+        \ifstrequal{#2}{white}{\fboxsep=0pt}{\fboxsep=\FrameSep}%
+        \ifbool{shaded}{\colorbox{#2}}{}%
+    }%
+    \MakeFramed{\hsize#3\advance\hsize-\width\FrameRestore}%
+}{%
+    \endMakeFramed
+}
+\makesavenoteenv{leftbar}
+
+% ─── Theorem style factory ───────────────────────────────────────────────────
+
+\NewDocumentCommand{\environmenttitleformatting}{}{\sffamily\bfseries}
+\NewDocumentCommand{\contentsentryformatting}{}{\sffamily}
+
+\NewDocumentCommand{\createtheoremstyle}{m m O{5pt}}{
+    \newtheoremstyle{#1}
+        {\topsep}{\topsep}{}{}{\environmenttitleformatting}{:}{#3}
+        {%
+            \thmname{##1}\thmnumber{ ##2}\thmnote{ (##3)}%
+            \ifstrempty{##2##3}{}%
+                {\addcontentsline{#2}{section}{\protect\contentsentryformatting##1~\ifstrempty{##2}{\phantom{1}}{##2}~\ifstrempty{##3}{}{##3}}}%
+        }%
+}
+
+\NewDocumentCommand{\contentstitleformatting}{m}{\centerline{\sffamily\bfseries #1}}
+
+\NewDocumentCommand{\mylistof}{m O{} O{0.5in} O{0.5in} O{0}}{
+    \vspace{-0.25em}
+    \begin{spacing}{#5}
+        \begin{adjustwidth}{#3}{#4}
+            \ifstrempty{#2}{}{\vspace*{1em}{\contentstitleformatting{#2}}}%
+            \@starttoc{#1}
+        \end{adjustwidth}
+    \end{spacing}
+    \vspace*{2.5em}
+}
+
+\NewDocumentCommand{\createtheorem}{m m m m o o}{
+    \theoremstyle{#1}
+    \newtheorem{my#2}{#3}
+    \newtheorem*{my#2*}{#3}
+    \NewDocumentEnvironment{#2}{o +b}%
+        {%
+            \IfNoValueTF{##1}{\begin{my#2}}{\begin{my#2}[##1]}%
+            \IfValueTF{#5}{%
+                \IfValueTF{#6}{\begin{leftbar}{#4}[#5][#6]}{\begin{leftbar}{#4}[#5]}%
+            }{%
+                \IfValueTF{#6}{\begin{leftbar}{#4}[#6]}{\begin{leftbar}{#4}}%
+            }%
+            \ifbool{showbody}{##2}{\phantom{hidden}}%
+            \end{leftbar}%
+            \end{my#2}%
+        }{}%
+    \NewDocumentEnvironment{#2*}{o +b}%
+        {%
+            \IfNoValueTF{##1}{\begin{my#2*}}{\begin{my#2*}[##1]}%
+            \IfValueTF{#5}{%
+                \IfValueTF{#6}{\begin{leftbar}{#4}[#5][#6]}{\begin{leftbar}{#4}[#5]}%
+            }{%
+                \IfValueTF{#6}{\begin{leftbar}{#4}[#6]}{\begin{leftbar}{#4}}%
+            }%
+            \ifbool{showbody}{##2}{\phantom{hidden}}%
+            \end{leftbar}%
+            \end{my#2*}%
+        }{}%
+}
+
+% ─── Colors ──────────────────────────────────────────────────────────────────
+
+\newcommand{\definitionleftbarcolor}{blue}
+\newcommand{\definitionfillcolor}{blue!10}
+\newcommand{\axiomleftbarcolor}{brown}
+\newcommand{\axiomfillcolor}{brown!10}
+\newcommand{\assumptionleftbarcolor}{brown}
+\newcommand{\assumptionfillcolor}{brown!10}
+\newcommand{\exampleleftbarcolor}{black}
+\newcommand{\examplefillcolor}{white}
+\newcommand{\questionleftbarcolor}{orange}
+\newcommand{\questionfillcolor}{orange!20}
+\newcommand{\answerleftbarcolor}{green}
+\newcommand{\answerfillcolor}{green!7}
+\newcommand{\exerciseleftbarcolor}{orange}
+\newcommand{\exercisefillcolor}{orange!10}
+\newcommand{\remarkleftbarcolor}{black}
+\newcommand{\remarkfillcolor}{white}
+\newcommand{\theoremleftbarcolor}{violet}
+\newcommand{\theoremfillcolor}{violet!20}
+\newcommand{\lemmaleftbarcolor}{violet}
+\newcommand{\lemmafillcolor}{violet!10}
+\newcommand{\propositionleftbarcolor}{violet}
+\newcommand{\propositionfillcolor}{violet!15}
+\newcommand{\conjectureleftbarcolor}{violet}
+\newcommand{\conjecturefillcolor}{violet!15}
+\newcommand{\corollaryleftbarcolor}{violet}
+\newcommand{\corollaryfillcolor}{violet!15}
+\newcommand{\factleftbarcolor}{violet}
+\newcommand{\factfillcolor}{violet!15}
+
+% ─── Theorem environments ────────────────────────────────────────────────────
+
+\createtheoremstyle{mydefinitions}{def}
+\createtheorem{mydefinitions}{definition}{Definition}{\definitionleftbarcolor}[\definitionfillcolor]
+\providecommand*\mydefinitionautorefname{Definition}
+
+\createtheoremstyle{myaxioms}{axm}
+\createtheorem{myaxioms}{axiom}{Axiom}{\axiomleftbarcolor}[\axiomfillcolor]
+
+\createtheoremstyle{myassumptions}{asm}
+\createtheorem{myassumptions}{assumption}{Assumption}{\assumptionleftbarcolor}[\assumptionfillcolor]
+
+\createtheoremstyle{myexamples}{exm}
+\createtheorem{myexamples}{example}{Example}{\exampleleftbarcolor}[\examplefillcolor]
+
+\createtheoremstyle{myquestions}{qsn}
+\createtheorem{myquestions}{question}{Question}{\questionleftbarcolor}[\questionfillcolor]
+
+\createtheoremstyle{myanswers}{ans}
+\createtheorem{myanswers}{answer}{Answer}{\answerleftbarcolor}[\answerfillcolor]
+
+\createtheoremstyle{myexercises}{qsn}
+\createtheorem{myexercises}{exercise}{Exercise}{\exerciseleftbarcolor}[\exercisefillcolor]
+
+\createtheoremstyle{myremarks}{rmk}
+\createtheorem{myremarks}{remark}{Remark}{\remarkleftbarcolor}[\remarkfillcolor]
+
+\createtheoremstyle{mytheorems}{thm}
+\createtheorem{mytheorems}{theorem}{Theorem}{\theoremleftbarcolor}[\theoremfillcolor]
+\providecommand*\mytheoremautorefname{Theorem}
+\createtheorem{mytheorems}{lemma}{Lemma}{\lemmaleftbarcolor}[\lemmafillcolor]
+\providecommand*\mylemmaautorefname{Lemma}
+\createtheorem{mytheorems}{proposition}{Proposition}{\propositionleftbarcolor}[\propositionfillcolor]
+\createtheorem{mytheorems}{conjecture}{Conjecture}{\conjectureleftbarcolor}[\conjecturefillcolor]
+\createtheorem{mytheorems}{corollary}{Corollary}{\corollaryleftbarcolor}[\corollaryfillcolor]
+\createtheorem{mytheorems}{fact}{Fact}{\factleftbarcolor}[\factfillcolor]
+
+% ─── Proof / Sketch ──────────────────────────────────────────────────────────
+
+\newcommand{\proofleftbarcolor}{magenta}
+\newcommand{\prooffillcolor}{magenta!5}
+\newcommand{\proofwidth}{0.95\hsize}
+\newcommand{\sketchleftbarcolor}{magenta}
+\newcommand{\sketchfillcolor}{magenta!5}
+\newcommand{\sketchwidth}{0.95\hsize}
+
+\RenewDocumentEnvironment{proof}{o +b}{%
+    \begin{leftbar}{\proofleftbarcolor}[\prooffillcolor][\proofwidth]
+        \noindent\textit{Proof\IfValueT{#1}{ (#1)}. }%
+        \ifbool{showbody}{#2}{\phantom{hidden}}%
+        \hfill\qedsymbol
+    \end{leftbar}%
+}{}
+
+\NewDocumentEnvironment{sketch}{o +b}{%
+    \begin{leftbar}{\sketchleftbarcolor}[\sketchfillcolor][\sketchwidth]
+        \noindent\textit{Sketch\IfValueT{#1}{ (#1)}. }%
+        \ifbool{showbody}{#2}{\phantom{hidden}}%
+        \hfill\qedsymbol
+    \end{leftbar}%
+}{}
+
+% ─── Colored environments (solution, reflection) ──────────────────────────────
+
+\NewDocumentCommand{\newcoloredenvironment}{m m m m m}{
+    \newbool{#2}
+    \setbool{#2}{true}
+    \NewDocumentEnvironment{#1}{O{#3} O{#4} +b}{%
+        \ifbool{#2}{\begin{leftbar}{##1}[##2][\hsize]}{}%
+        \ifbool{#2}{##3}{}%
+    }{%
+        \ifbool{#2}{#5}{}%
+        \ifbool{#2}{\end{leftbar}}{}%
+        \nobreak
+    }%
+}
+
+\newcommand{\solutionleftbarcolor}{gray}
+\newcommand{\solutionfillcolor}{gray!20}
+\newcoloredenvironment{solution}{showsolutions}{\solutionleftbarcolor}{\solutionfillcolor}{}
+
+\newcommand{\reflectionleftbarcolor}{teal}
+\newcommand{\reflectionfillcolor}{teal!5}
+\newcoloredenvironment{reflection}{showreflections}{\reflectionleftbarcolor}{\reflectionfillcolor}{}
+
+% Patch solution/reflection to emit extramarks
+\let\oldsolution\solution
+\let\endoldsolution\endsolution
+\renewenvironment{solution}{\oldsolution}{%
+    \endoldsolution
+    \nobreak\extramarks{\Problem\ \thesection\ (continued)}{\Problem\ \thesection\ continued on next page\ldots}\nobreak{}%
+    \nobreak\extramarks{\Problem\ \thesection}{}\nobreak{}%
+}
+
+\let\oldreflection\reflection
+\let\endoldreflection\endreflection
+\renewenvironment{reflection}{\oldreflection}{%
+    \endoldreflection
+    \nobreak\extramarks{\Problem\ \thesection\ (continued)}{\Problem\ \thesection\ continued on next page\ldots}\nobreak{}%
+    \nobreak\extramarks{\Problem\ \thesection}{}\nobreak{}%
+}
+
+% ─── Question box ────────────────────────────────────────────────────────────
+%  Gray left bar + gray!15 fill — matches the PDF
+
+\newenvironment{questionbox}[1][Question]{%
+    \def\FrameCommand{%
+        {\color{gray}\vrule width 1pt}%
+        \hspace{0pt}%
+        \fboxsep=\FrameSep
+        \colorbox{gray!15}%
+    }%
+    \MakeFramed{\hsize\hsize\advance\hsize-\width\FrameRestore}%
+    \noindent{\sffamily\bfseries #1:}\quad\ignorespaces
+}{%
+    \endMakeFramed
+}
+
+% ─── Compartment ─────────────────────────────────────────────────────────────
+
+\NewDocumentCommand{\compartmenttitleformatting}{m}{\noindent{\sffamily\bfseries{#1}}}
+\NewDocumentEnvironment{compartment}{o +b}{%
+    \begin{framed}%
+        \IfValueTF{#1}{\compartmenttitleformatting{#1}}{}%
+        #2%
+}{%
+    \end{framed}%
+}
+
+% ─── Math Macros (from oakmacros) ────────────────────────────────────────────
+
+% Number sets
+\newcommand{\reals}{\mathbbm{R}}
+\newcommand{\rationals}{\mathbbm{Q}}
+\newcommand{\integers}{\mathbbm{Z}}
+\newcommand{\naturals}{\mathbbm{N}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\given}{\,\middle\vert\,}
+\newcommand{\sth}{\text{ s.t. }}
+\newcommand{\notimplies}{\centernot\implies}
+
+% Number equations in * environments
+\NewDocumentCommand{\numberthis}{O{}}{%
+    \addtocounter{equation}{1}%
+    \tag{\theequation}%
+    \ifstrempty{#1}{}{\label{eq:#1}}%
+}
+
+% Annotations
+\NewDocumentCommand{\annotationformatting}{m}{\text{#1}}
+\NewDocumentCommand{\annotate}{mO{darkgray}O{\qquad}}{&#3 &\textcolor{#2}{\annotationformatting{#1}}}
+
+% Color helpers
+\newcommand{\mytext}[2]{\ifmmode\text{\textcolor{#1}{#2}}\else\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[1]{\mytext{red}{TODO: #1}}
+\newcommand{\mynote}[1]{\mytext{blue}{NOTE: #1}}
+\NewDocumentCommand{\scratchwork}{m}{\ifbool{showscratchwork}{#1}{}}
+
+% Paired delimiters
+\DeclarePairedDelimiter{\parens}{(}{)}
+\DeclarePairedDelimiter{\bracks}{[}{]}
+\DeclarePairedDelimiter{\braces}{\{}{\}}
+\DeclarePairedDelimiter{\abs}{\vert}{\vert}
+\DeclarePairedDelimiter{\norm}{\Vert}{\Vert}
+\DeclarePairedDelimiter{\ang}{\langle}{\rangle}
+\DeclarePairedDelimiter{\ip}{\langle}{\rangle}
+
+% Probability & Statistics
+\DeclareMathOperator{\prob}{\mathbbm{P}}
+\DeclareMathOperator{\expval}{\mathbbm{E}}
+\DeclareMathOperator{\var}{\mathbbm{V}}
+\DeclareMathOperator{\cov}{\mathbbm{C}}
+\DeclareMathOperator{\corr}{Corr}
+\DeclareMathOperator{\supp}{supp}
+
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+\newcommand{\defaultdelim}[1]{\parens*{#1}}
+\newcommand{\Prob}[1]{\prob\defaultdelim{#1}}
+\newcommand{\ProbP}[1]{\prob\parens*{#1}}
+\newcommand{\ProbB}[1]{\prob\bracks*{#1}}
+\newcommand{\CProb}[2]{\prob\defaultdelim{#1 \given #2}}
+\newcommand{\CProbP}[2]{\prob\parens*{#1 \given #2}}
+\newcommand{\CProbB}[2]{\prob\bracks*{#1 \given #2}}
+\newcommand{\Exp}[1]{\expval\defaultdelim{#1}}
+\newcommand{\ExpP}[1]{\expval\parens*{#1}}
+\newcommand{\ExpB}[1]{\expval\bracks*{#1}}
+\newcommand{\CExp}[2]{\expval\defaultdelim{#1 \given #2}}
+\newcommand{\CExpP}[2]{\expval\parens*{#1 \given #2}}
+\newcommand{\CExpB}[2]{\expval\bracks*{#1 \given #2}}
+\newcommand{\Var}[1]{\var\defaultdelim{#1}}
+\newcommand{\VarP}[1]{\var\parens*{#1}}
+\newcommand{\VarB}[1]{\var\bracks*{#1}}
+\newcommand{\CVar}[2]{\var\defaultdelim{#1 \given #2}}
+\newcommand{\CVarP}[2]{\var\parens*{#1 \given #2}}
+\newcommand{\CVarB}[2]{\var\bracks*{#1 \given #2}}
+\newcommand{\Cov}[1]{\cov\defaultdelim{#1}}
+\newcommand{\CovP}[1]{\cov\parens*{#1}}
+\newcommand{\CovB}[1]{\cov\bracks*{#1}}
+\newcommand{\CCov}[2]{\cov\defaultdelim{#1 \given #2}}
+\newcommand{\CCovP}[2]{\cov\parens*{#1 \given #2}}
+\newcommand{\CCovB}[2]{\cov\bracks*{#1 \given #2}}
+\newcommand{\Exphat}[1]{\hat{\expval}\parens*{#1}}
+\newcommand{\ExpBhat}[1]{\hat{\expval}\bracks*{#1}}
+\newcommand{\CExphat}[2]{\hat{\expval}\parens*{#1 \given #2}}
+\newcommand{\CExpBhat}[2]{\hat{\expval}\bracks*{#1 \given #2}}
+
+\newcommand{\plim}{\xrightarrow{p}}
+\newcommand{\dlim}{\xrightarrow{d}}
+\newcommand{\aslim}{\xrightarrow{a.s.}}
+
+% Linear Algebra
+\DeclareMathOperator{\trace}{tr}
+\DeclareMathOperator{\rank}{rk}
+\newcommand{\trp}[1]{#1\phantom{}'}
+\newcommand{\trT}[1]{#1\phantom{}^{\mathsf T}}
+\newcommand{\tr}[1]{\trp{#1}}
+\newcommand{\inv}[1]{#1^{-1}}
+\DeclareMathOperator{\nullspace}{null}
+\DeclareMathOperator{\colspace}{col}
+\newcommand*{\vertbar}{\rule[-.5ex]{0.5pt}{2.5ex}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+
+% Optimization
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\minmax}{min/max}
+\DeclareMathOperator*{\maxmin}{max/min}
+
+% Miscellaneous
+\newcommand{\set}[1]{\braces*{#1}}
+\newcommand{\Ind}[1]{\mathbbm{1}\defaultdelim{#1}}
+\newcommand{\IndP}[1]{\mathbbm{1}\parens*{#1}}
+\newcommand{\IndB}[1]{\mathbbm{1}\bracks*{#1}}
+\DeclareMathOperator{\sign}{sgn}
+\newcommand{\intd}[1]{\mathrm{d}{#1}}
+\newcommand{\expp}[1]{\exp\parens*{#1}}
+\newcommand{\expb}[1]{\exp\bracks*{#1}}
+\newcommand{\expr}[1]{\exp\braces*{#1}}
+\DeclareMathOperator{\interior}{int}
+\DeclareMathOperator{\closure}{cl}
+\DeclareMathOperator{\im}{Im}
+\let\ker\relax
+\DeclareMathOperator{\ker}{Ker}

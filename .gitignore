@@ -1,0 +1,62 @@
+# Task inputs and outputs are rebuilt by make, never committed
+tasks/*/input/
+tasks/*/output/
+tasks/*/temp/
+tasks/*/report/
+
+# PDFs and CSVs (compiled documents and data are rebuilt, not committed)
+*.pdf
+*.csv
+
+# Data files
+*.parquet
+*.rds
+*.feather
+*.arrow
+*.dta
+*.jld2
+
+# LaTeX build artefacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+
+# Inputs symlinked into the documents (rebuilt by their Makefiles)
+paper/input/
+slides/input/
+logbook/input/
+
+# R
+lib/R/tests/_problems/
+testthat-problems.rds
+.Rhistory
+.RData
+.Rproj.user/
+renv/library/
+renv/staging/
+renv/local/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# OS and editor junk
+.DS_Store
+Thumbs.db
+*~
+*.swp

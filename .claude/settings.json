@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(/tasks/*/input/**)",
+      "Read(/**/*.parquet)",
+      "Read(/**/*.rds)",
+      "Read(/**/*.feather)",
+      "Read(/**/*.arrow)",
+      "Read(/**/*.dta)",
+      "Read(/**/*.jld2)",
+      "Read(/**/*.csv)"
+    ]
+  }
+}

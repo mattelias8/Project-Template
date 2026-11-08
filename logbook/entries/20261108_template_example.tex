@@ -1,0 +1,17 @@
+\input{./input/sum_macros.tex}
+This entry shows how a result reaches the logbook.
+\texttt{tasks/example\_numbers} writes a short table of integers.
+\texttt{tasks/example\_sum} links that table into its \texttt{input/} folder, sums it, and writes the result as the macro \texttt{\textbackslash exampleSum}.
+The logbook's Makefile links that output into \texttt{logbook/input/}, so the number below is never typed by hand.
+
+\begin{table}[h]
+\centering
+\caption{Example task output}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value \\
+\midrule
+Sum of the example numbers & \exampleSum \\
+\bottomrule
+\end{tabular}
+\end{table}

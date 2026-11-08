@@ -1,0 +1,7 @@
+# Python packages for this project, pinned. Installed into .venv/ by tasks/setup_environment.
+# The full resolved list (with dependencies) is written to setup_environment/output/python_venv.txt.
+pandas==2.2.3
+pyarrow==18.0.0
+PyYAML==6.0.2
+pytest==8.3.3
+ruff==0.7.4

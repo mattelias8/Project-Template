@@ -1,0 +1,602 @@
+% aaron_notes.sty
+% LaTeX package for lecture notes
+% Provides theorem environments, formatting, and useful commands
+% Compatible with subfiles package for modular document structure
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{aaron_notes}[2025/01/14 Lecture Notes Style Package]
+
+% ============================================================================
+% PACKAGE OPTIONS
+% ============================================================================
+
+\newif\if@coloredtheorems\@coloredtheoremsfalse
+\DeclareOption{coloredtheorems}{\@coloredtheoremstrue}
+
+\newif\if@fancyheaders\@fancyheadersfalse
+\DeclareOption{fancyheaders}{\@fancyheaderstrue}
+
+\newif\if@marginnotes\@marginnotesfalse
+\DeclareOption{marginnotes}{\@marginnotestrue}
+
+\newif\if@standalone\@standalonefalse
+\DeclareOption{standalone}{\@standalonetrue}
+
+\ProcessOptions\relax
+
+% ============================================================================
+% REQUIRED PACKAGES
+% ============================================================================
+
+% Math packages
+\RequirePackage{amsmath,amsthm,amssymb,amsfonts}
+\RequirePackage{mathtools}
+\RequirePackage{bbm}
+
+% Formatting
+\RequirePackage[margin=1in]{geometry}
+\RequirePackage{setspace}
+\RequirePackage{parskip}
+\RequirePackage{caption}
+
+% Graphics and colors
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+
+% For highlighted boxes
+\RequirePackage{tcolorbox}
+\tcbuselibrary{theorems,skins,breakable}
+
+% Lists and enumeration
+\RequirePackage{enumerate}
+\RequirePackage{enumitem}
+
+% Table of contents formatting
+\RequirePackage{titletoc}
+\RequirePackage{titlesec}
+
+% Hyperlinks
+\RequirePackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+% Headers (conditional)
+\if@fancyheaders
+    \RequirePackage{fancyhdr}
+    \pagestyle{fancy}
+    \fancyhf{}
+    \fancyhead[L]{\leftmark}
+    \fancyhead[R]{\thepage}
+    \renewcommand{\headrulewidth}{0.4pt}
+\fi
+
+% Margin notes (conditional)
+\if@marginnotes
+    \RequirePackage{marginnote}
+    \renewcommand*{\marginfont}{\footnotesize\itshape}
+\fi
+
+% ============================================================================
+% TABLE OF CONTENTS FORMATTING
+% ============================================================================
+
+% Customize TOC depth
+\setcounter{tocdepth}{2}
+
+% Part formatting in TOC
+\titlecontents{part}
+    [0em]
+    {\addvspace{1em}\bfseries\large}
+    {\contentslabel{2em}}
+    {}
+    {\hfill\contentspage}
+    [\addvspace{0.5em}]
+
+% Section formatting in TOC
+\titlecontents{section}
+    [1.5em]
+    {\addvspace{0.3em}}
+    {\contentslabel{2.3em}}
+    {\hspace*{-2.3em}}
+    {\titlerule*[0.5pc]{.}\contentspage}
+
+% Subsection formatting in TOC
+\titlecontents{subsection}
+    [3.8em]
+    {}
+    {\contentslabel{2.3em}}
+    {\hspace*{-2.3em}}
+    {\titlerule*[0.5pc]{.}\contentspage}
+
+% ============================================================================
+% SECTION FORMATTING
+% ============================================================================
+
+% Part formatting (for major topics)
+\titleformat{\part}
+    [display]
+    {\normalfont\huge\bfseries\centering}
+    {\partname\ \thepart}
+    {20pt}
+    {\Huge}
+
+% Section formatting (for subtopics/lectures)
+\titleformat{\section}
+    {\normalfont\Large\bfseries}
+    {\thesection}
+    {1em}
+    {}
+
+% Subsection formatting
+\titleformat{\subsection}
+    {\normalfont\large\bfseries}
+    {\thesubsection}
+    {1em}
+    {}
+
+% ============================================================================
+% COLORS FOR THEOREM ENVIRONMENTS
+% ============================================================================
+
+\definecolor{theoremcolor}{RGB}{0,100,200}
+\definecolor{definitioncolor}{RGB}{0,150,100}
+\definecolor{lemmacolor}{RGB}{150,0,150}
+\definecolor{propositioncolor}{RGB}{200,100,0}
+\definecolor{corollarycolor}{RGB}{100,0,100}
+\definecolor{remarkcolor}{RGB}{100,100,100}
+\definecolor{examplecolor}{RGB}{0,128,128}
+\definecolor{overviewcolor}{RGB}{140,80,200}
+\definecolor{highlightcolor}{RGB}{220,235,255}
+\definecolor{highlightborder}{RGB}{70,130,220}
+\definecolor{notecolor}{RGB}{255,250,205}
+\definecolor{noteborder}{RGB}{218,165,32}
+
+% ============================================================================
+% THEOREM ENVIRONMENTS
+% ============================================================================
+
+\if@coloredtheorems
+    
+    \newtcbtheorem[number within=section]{lemma@tcb}{Lemma}{
+        colback=lemmacolor!5,
+        colframe=lemmacolor,
+        fonttitle=\bfseries,
+        separator sign none
+    }{lem}
+    \newenvironment{lemma}{\begin{lemma@tcb}{}}{\end{lemma@tcb}}
+    
+    \newtcbtheorem[number within=section]{proposition@tcb}{Proposition}{
+        colback=propositioncolor!5,
+        colframe=propositioncolor,
+        fonttitle=\bfseries,
+        separator sign none
+    }{prop}
+    \newenvironment{proposition}{\begin{proposition@tcb}{}}{\end{proposition@tcb}}
+    
+    \newtcbtheorem[number within=section]{corollary@tcb}{Corollary}{
+        colback=corollarycolor!5,
+        colframe=corollarycolor,
+        fonttitle=\bfseries,
+        separator sign none
+    }{cor}
+    \newenvironment{corollary}{\begin{corollary@tcb}{}}{\end{corollary@tcb}}
+    
+    \newtcbtheorem[number within=section]{remark@tcb}{Remark}{
+        colback=remarkcolor!5,
+        colframe=remarkcolor,
+        fonttitle=\bfseries,
+        separator sign none
+    }{rem}
+    \newenvironment{remark}{\begin{remark@tcb}{}}{\end{remark@tcb}}
+\else
+    \theoremstyle{plain}
+    \newtheorem{lemma}{Lemma}[section]
+    \newtheorem{proposition}[lemma]{Proposition}
+    \newtheorem{corollary}[lemma]{Corollary}
+    
+    \theoremstyle{definition}
+    \newtheorem{exercise}[lemma]{Exercise}
+    
+    \theoremstyle{remark}
+    \newtheorem{remark}[lemma]{Remark}
+    \newtheorem{note}[lemma]{Note}
+\fi
+
+\renewenvironment{proof}{\textit{Proof.}}{\hfill$\square$\vspace{0.5em}}
+
+% ============================================================================
+% COLOURED BOX ENVIRONMENTS
+% ============================================================================
+% These four environments are always available regardless of package options.
+% Each accepts an optional title: \begin{overview}[Title] ... \end{overview}
+
+% Section overview box (purple) — use at the start of a section/lecture
+\newtcolorbox{overview}[1][]{
+    enhanced,
+    colback=overviewcolor!8,
+    colframe=overviewcolor,
+    boxrule=1.5pt,
+    arc=4pt,
+    left=8pt, right=8pt, top=8pt, bottom=8pt,
+    fontupper=\normalsize,
+    title={\textbf{\S\ Overview}\ifx\relax#1\relax\else: #1\fi},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=overviewcolor,
+    attach boxed title to top left={yshift=-2mm, xshift=6pt},
+    boxed title style={arc=3pt, boxrule=0pt},
+    breakable
+}
+
+% Theorem box (blue) — for stating results formally
+\newtcolorbox{theorem}[1][]{
+    enhanced,
+    colback=theoremcolor!6,
+    colframe=theoremcolor,
+    boxrule=1.5pt,
+    arc=4pt,
+    left=8pt, right=8pt, top=8pt, bottom=8pt,
+    fontupper=\normalsize,
+    title={\textbf{Theorem}\ifx\relax#1\relax\else\ (#1)\fi},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=theoremcolor,
+    attach boxed title to top left={yshift=-2mm, xshift=6pt},
+    boxed title style={arc=3pt, boxrule=0pt},
+    breakable
+}
+
+% Definition box (green) — for introducing new terms
+\newtcolorbox{definition}[1][]{
+    enhanced,
+    colback=definitioncolor!6,
+    colframe=definitioncolor,
+    boxrule=1.5pt,
+    arc=4pt,
+    left=8pt, right=8pt, top=8pt, bottom=8pt,
+    fontupper=\normalsize,
+    title={\textbf{Definition}\ifx\relax#1\relax\else\ (#1)\fi},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=definitioncolor,
+    attach boxed title to top left={yshift=-2mm, xshift=6pt},
+    boxed title style={arc=3pt, boxrule=0pt},
+    breakable
+}
+
+% Example box (teal) — for worked examples
+\newtcolorbox{example}[1][]{
+    enhanced,
+    colback=examplecolor!6,
+    colframe=examplecolor,
+    boxrule=1.5pt,
+    arc=4pt,
+    left=8pt, right=8pt, top=8pt, bottom=8pt,
+    fontupper=\normalsize,
+    title={\textbf{Example}\ifx\relax#1\relax\else: #1\fi},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colbacktitle=examplecolor,
+    attach boxed title to top left={yshift=-2mm, xshift=6pt},
+    boxed title style={arc=3pt, boxrule=0pt},
+    breakable
+}
+
+% ============================================================================
+% HIGHLIGHTED KEY POINTS SECTION
+% ============================================================================
+
+% Basic highlighted section (no title)
+\newtcolorbox{highlight}{
+    colback=highlightcolor,
+    colframe=highlightborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize,
+    breakable
+}
+
+% Highlighted section with custom title
+\newtcolorbox{highlighttitle}[1][]{
+    colback=highlightcolor,
+    colframe=highlightborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize,
+    title={#1},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=highlightborder!30,
+    breakable
+}
+
+% Key points environment with bullet icon
+\newtcolorbox{keypoints}{
+    colback=highlightcolor,
+    colframe=highlightborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize,
+    title={\textbf{$\star$ Key Points}},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=highlightborder!30,
+    breakable
+}
+
+% Takeaway box (stronger emphasis)
+\newtcolorbox{takeaway}{
+    enhanced,
+    colback=highlightcolor,
+    colframe=highlightborder,
+    boxrule=2pt,
+    arc=3pt,
+    left=10pt,
+    right=10pt,
+    top=10pt,
+    bottom=10pt,
+    fontupper=\normalsize,
+    title={\textbf{Main Takeaway}},
+    fonttitle=\bfseries\large,
+    coltitle=white,
+    colbacktitle=highlightborder,
+    attach boxed title to top center={yshift=-3mm},
+    boxed title style={arc=2pt},
+    breakable
+}
+
+% ============================================================================
+% PERSONAL NOTES SECTION
+% ============================================================================
+
+% Basic personal note (no title)
+\newtcolorbox{personalnote}{
+    colback=notecolor,
+    colframe=noteborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize\itshape,
+    breakable
+}
+
+% Personal note with custom title
+\newtcolorbox{personalnotetitle}[1][]{
+    colback=notecolor,
+    colframe=noteborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize\itshape,
+    title={#1},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=noteborder!30,
+    breakable
+}
+
+% Personal note with "Note to Self" header
+\newtcolorbox{notetoself}{
+    colback=notecolor,
+    colframe=noteborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize\itshape,
+    title={\textbf{$\blacktriangleright$ Note to Self}},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=noteborder!30,
+    breakable
+}
+
+% Personal note with "My Thoughts" header
+\newtcolorbox{mythoughts}{
+    colback=notecolor,
+    colframe=noteborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize\itshape,
+    title={\textbf{$\triangleright$ My Thoughts}},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=noteborder!30,
+    breakable
+}
+
+% Question/confusion box
+\newtcolorbox{question}{
+    colback=notecolor,
+    colframe=noteborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize\itshape,
+    title={\textbf{? Question}},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=noteborder!30,
+    breakable
+}
+
+% Todo/follow-up box
+\newtcolorbox{todo}{
+    colback=notecolor,
+    colframe=noteborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize\itshape,
+    title={\textbf{$\square$ To Do}},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=noteborder!30,
+    breakable
+}
+
+% Connection to other material
+\newtcolorbox{connection}{
+    colback=notecolor,
+    colframe=noteborder,
+    boxrule=1.5pt,
+    arc=3pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fontupper=\normalsize\itshape,
+    title={\textbf{$\leftrightarrow$ Connection}},
+    fonttitle=\bfseries,
+    coltitle=black,
+    colbacktitle=noteborder!30,
+    breakable
+}
+
+% ============================================================================
+% USEFUL COMMANDS
+% ============================================================================
+
+% Course information commands
+\newcommand{\course}[1]{\gdef\@course{#1}}
+\newcommand{\lecturer}[1]{\gdef\@lecturer{#1}}
+\newcommand{\semester}[1]{\gdef\@semester{#1}}
+\newcommand{\lecturedate}[1]{\gdef\@lecturedate{#1}}
+
+% Title page formatting for entire course notes
+\newcommand{\makecovertitle}{
+    \begin{titlepage}
+        \centering
+        \vspace*{2cm}
+        {\Huge\bfseries\@title\par}
+        \vspace{1.5cm}
+        \ifdef{\@course}{{\LARGE\@course\par}}{}
+        \vspace{1cm}
+        \ifdef{\@lecturer}{{\Large Lecturer: \@lecturer\par}}{}
+        \vspace{0.5cm}
+        \ifdef{\@semester}{{\Large\@semester\par}}{}
+        \vfill
+        \ifdef{\@author}{{\large Notes by: \@author\par}}{}
+        \vspace{0.5cm}
+        {\large\@date\par}
+    \end{titlepage}
+}
+
+% Simple title for standalone chapters
+\newcommand{\makechaptertitle}{
+    \begin{center}
+        {\Large\bfseries\@title}\\[0.5em]
+        \ifdef{\@course}{{\large\@course}\\}{}
+        \ifdef{\@lecturer}{Lecturer: \@lecturer\\}{}
+        \ifdef{\@semester}{\@semester\\}{}
+        \ifdef{\@author}{Notes by: \@author}{}
+    \end{center}
+    \vspace{1em}
+}
+
+% Lecture header command for individual lectures within document
+\newcommand{\lecture}[2]{
+    \section{#1}
+    \if@marginnotes
+        \marginnote{\small\textit{#2}}
+    \fi
+}
+
+% Topic command (creates a new part)
+\newcommand{\topic}[1]{\part{#1}}
+
+% ============================================================================
+% MATHEMATICAL OPERATORS
+% ============================================================================
+
+\DeclareMathOperator{\prob}{\mathbbm{P}}    % probability
+\DeclareMathOperator{\expval}{\mathbbm{E}}   % expected value
+\DeclareMathOperator{\var}{\mathbbm{V}}      % variance
+\DeclareMathOperator{\cov}{\mathbbm{C}}      % covariance
+\DeclareMathOperator{\corr}{Corr}           % correlation
+\DeclareMathOperator{\supp}{supp}           % support
+
+\newcommand{\plim}{\xlongrightarrow{p}}
+\newcommand{\dlim}{\xlongrightarrow{d}}
+
+% ============================================================================
+% COMMON NOTATION SHORTCUTS
+% ============================================================================
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Prob}{\mathbb{P}}
+
+\newcommand{\ind}{\mathbbm{1}}
+\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
+\newcommand{\dto}{\xrightarrow{d}}
+\newcommand{\pto}{\xrightarrow{p}}
+\newcommand{\asto}{\xrightarrow{a.s.}}
+
+% Parentheses shortcuts
+\newcommand{\paren}[1]{\left(#1\right)}
+\newcommand{\brac}[1]{\left[#1\right]}
+\newcommand{\curly}[1]{\left\{#1\right\}}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\inner}[1]{\left\langle#1\right\rangle}
+
+% Derivatives
+\newcommand{\dd}[2]{\frac{d#1}{d#2}}
+\newcommand{\ddd}[2]{\frac{d^2#1}{d#2^2}}
+\newcommand{\pd}[2]{\frac{\partial#1}{\partial#2}}
+\newcommand{\pdd}[2]{\frac{\partial^2#1}{\partial#2^2}}
+
+% Highlighting and notes
+\newcommand{\vocab}[1]{\textbf{\color{blue}#1}}
+\newcommand{\important}[1]{\textbf{\color{red}#1}}
+\newcommand{\sidenote}[1]{\if@marginnotes\marginnote{#1}\else\footnote{#1}\fi}
+
+% Box for key results
+\newcommand{\keyresult}[1]{%
+    \begin{center}
+    \fbox{\begin{minipage}{0.9\textwidth}
+        \textbf{Key Result:} #1
+    \end{minipage}}
+    \end{center}
+}
+
+% ============================================================================
+% LIST FORMATTING
+% ============================================================================
+
+\setlist[itemize]{leftmargin=*,topsep=0.5em}
+\setlist[enumerate]{leftmargin=*,topsep=0.5em}
+
+\endinput

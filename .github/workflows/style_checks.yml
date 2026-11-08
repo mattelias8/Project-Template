@@ -1,0 +1,52 @@
+name: Python and Julia style
+
+# Each job skips cleanly when the repository has no files in that language.
+on:
+  pull_request:
+    types: [opened, reopened, review_requested, ready_for_review]
+  workflow_dispatch:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: files
+        run: |
+          if git ls-files '*.py' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No Python files; skipping ruff."
+          fi
+      - if: steps.files.outputs.found == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: ruff (version pinned in requirements.txt)
+        if: steps.files.outputs.found == 'true'
+        run: |
+          pip install "$(grep '^ruff==' requirements.txt)"
+          ruff check .
+
+  julia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: files
+        run: |
+          if git ls-files '*.jl' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No Julia files; skipping JuliaFormatter."
+          fi
+      - if: steps.files.outputs.found == 'true'
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+      - name: JuliaFormatter (settings in .JuliaFormatter.toml)
+        if: steps.files.outputs.found == 'true'
+        run: |
+          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
+          julia -e 'using JuliaFormatter; exit(format("."; overwrite = false) ? 0 : 1)'

@@ -1,0 +1,3 @@
+# Julia environment for this project. Add packages with `julia --project=.` then `] add Pkg`.
+# Tasks run Julia with --project set to the repository root.
+[deps]

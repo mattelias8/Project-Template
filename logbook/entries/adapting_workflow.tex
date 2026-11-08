@@ -1,0 +1,63 @@
+\label{entry:adapting}
+This template adapts Dingel's original, which was written for Stata, Julia and R on SLURM clusters.
+It supports R, Python and Julia.
+R is the default in the example tasks and the shared helpers.
+Footnotes marked ``Template note'' flag earlier passages that do not apply here.
+
+\subsection{Environments}
+The dependency files live at the repository root and are committed:
+\begin{itemize}
+	\item R: \texttt{renv.lock}, managed by \texttt{renv}. The root \texttt{.Rprofile} activates the project library when R starts at the root.
+	\item Python: \texttt{requirements.txt}, with every package pinned, installed into \texttt{.venv/}.
+	\item Julia: \texttt{Project.toml} and \texttt{Manifest.toml}.
+\end{itemize}
+The task \texttt{tasks/setup\_environment} restores them.
+Its \texttt{make} builds R and Python; \texttt{make julia} builds Julia.
+Tasks never need to run it by hand: each task's Makefile lists the environment it uses as an order-only prerequisite, so Make builds it on first use.
+To add a package, install it (\texttt{renv::install()}, a pinned line in \texttt{requirements.txt}, or \texttt{Pkg.add}), update the dependency file, and commit both in the same pull request as the code that needs it.
+
+\subsection{Make recipes}
+Every task's Makefile starts by including the shared rules, then declares \texttt{all}:
+\begin{lstlisting}[language=make]
+include ../../generic.make
+include ../../shell_functions.make
+
+all: ../output/$(T)sum_macros.tex
+
+../input/$(T)numbers.csv: ../../example_numbers/output/$(T)numbers.csv | ../input/$(T)
+	$(LINK)
+
+../output/$(T)sum_macros.tex: sum.R ../input/$(T)numbers.csv $(LIB_R)/helpers.R | $(R_OOPR)
+	$(R) $< $(LIB_R) ../input/$(T)numbers.csv $@
+\end{lstlisting}
+\begin{itemize}
+	\item \texttt{\$(R)} runs \texttt{Rscript --vanilla} with the renv project library.
+	\texttt{\$(PYTHON)} runs \texttt{.venv/bin/python}.
+	\texttt{\$(JULIA)} runs \texttt{julia --project} with the repository root as the project.
+	Each stops with a clear message if its environment is missing.
+	\item \texttt{\$(R\_OOPR)}, \texttt{\$(PYTHON\_OOPR)} and \texttt{\$(JULIA\_OOPR)} are the order-only prerequisites: the task's folders plus the matching environment.
+	\item \texttt{\$(LINK)} makes the symbolic link from \texttt{input/} to the upstream output.
+	\item If an upstream output is missing, a generic rule in \texttt{generic.make} runs \texttt{make} in the upstream task to build it.
+	\item \texttt{make clean} deletes the task's \texttt{input/} and \texttt{output/}. Running \texttt{make clean} and then \texttt{make} proves that every output comes from the current code.
+	\item Scripts receive every path and parameter as an argument, starting with the path to \texttt{lib/R}.
+\end{itemize}
+The top-level \texttt{Makefile} runs every task in the order listed in \texttt{TASKS}, then builds the task graph, paper, slides and logbook.
+Add each new task to \texttt{TASKS}.
+macOS ships GNU Make 3.81, so the Makefiles avoid newer features such as grouped targets.
+
+\subsection{Test mode}
+\texttt{make TEST=TRUE} runs a task, or the whole project, on a small sample.
+Scripts read only the first \texttt{TEST\_NROWS} rows (default 1000) through \texttt{test\_nrows()} or \texttt{read\_table()}.
+Test runs read from \texttt{input/test/} and write to \texttt{output/test/}, so they never overwrite full outputs.
+This is why targets are written as \texttt{../output/\$(T)file}: \texttt{\$(T)} is empty in a full run and \texttt{test/} in a test run.
+
+\subsection{Shared helpers}
+\texttt{lib/R/helpers.R} holds functions that every task uses, each with a unit test in \texttt{lib/R/tests/}:
+\texttt{parse\_args()}, \texttt{read\_config()}, \texttt{test\_nrows()}, \texttt{read\_table()}, \texttt{save\_table()}, \texttt{assert\_key()} and \texttt{write\_tex\_macros()}.
+\texttt{make test} at the root runs the tests, and \texttt{make lint} checks style.
+A project that needs Python or Julia helpers follows the same pattern in \texttt{lib/python/} with \texttt{pytest}, or \texttt{lib/julia/} with \texttt{Test}.
+
+\subsection{Documents}
+The paper, slides and logbook compile with \texttt{latexmk}.
+Shared styles and macros live in \texttt{latex/} and the bibliography in \texttt{bib/}; \texttt{.latexmkrc} puts both on LaTeX's search paths.
+Each document links the task outputs it uses into its own \texttt{input/} folder, as tasks do.
